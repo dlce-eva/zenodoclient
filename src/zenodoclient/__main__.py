@@ -9,7 +9,7 @@ from prompt_toolkit.completion import Completer, Completion
 from prompt_toolkit.contrib.completers import WordCompleter
 
 from zenodoclient.api import Zenodo, API_URL
-from zenodoclient.models import Deposition, DepositionFile
+from zenodoclient.models import Deposition
 
 
 def pretty_print(obj):
@@ -69,7 +69,7 @@ def _update(ctx, dep):
     md = {}
     k = prompt(u'key: ', completer=WordCompleter([f.name for f in attr.fields(dep.metadata.__class__)]))
     while k:
-        v = prompt(u'value: ')
+        v = prompt(u'value: ', default=getattr(dep, k, ''))
         if v:
             md[k] = v
         k = prompt(u'key: ', completer=WordCompleter([f.name for f in attr.fields(dep.metadata.__class__)]))
