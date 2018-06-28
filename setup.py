@@ -29,7 +29,7 @@ setup(
         'pathlib2; python_version < "3.5"',
         'click',
         'tabulate',
-        'prompt_toolkit',
+        'prompt_toolkit~=1.0.15',
     ],
     extras_require={
         'dev': ['flake8', 'wheel', 'twine'],
