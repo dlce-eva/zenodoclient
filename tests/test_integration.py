@@ -1,11 +1,7 @@
-# coding: utf8
-from __future__ import unicode_literals, print_function, division
 import os
-import warnings
-import time
-
-from urllib3.exceptions import InsecurePlatformWarning, SNIMissingWarning
 import pytest
+import warnings
+from urllib3.exceptions import InsecurePlatformWarning, SNIMissingWarning
 
 import zenodoclient
 from zenodoclient.api import Zenodo, API_URL_SANDBOX
@@ -19,7 +15,8 @@ def test_api():
     if not at:
         return
     api = Zenodo(api_url=API_URL_SANDBOX, access_token=at)
-    dep = api.create(title='title', creators=[{'name': 'Doe, John'}], description='desc')
+    dep = api.create(title='title', creators=[{'name': 'Doe, John'}],
+                     description='desc')
     assert dep.metadata.title == 'title'
     dep = api.update(dep, title='other')
     assert dep.metadata.title == 'other'
