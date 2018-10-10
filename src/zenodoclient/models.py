@@ -132,7 +132,7 @@ class Metadata(object):
         validator=attr.validators.in_(UPLOAD_TYPES))
     publication_date = attr.ib(
         default=attr.Factory(lambda: date.today().isoformat()),
-        validator=partial(check_regex, '\d{4}-\d{2}-\d{2}'))
+        validator=partial(check_regex, r'\d{4}-\d{2}-\d{2}'))
     title = attr.ib(default='')
     creators = attr.ib(
         default=attr.Factory(list),
@@ -247,7 +247,7 @@ class Deposition(Entity):
     http://developers.zenodo.org/#representation
     """
     metadata = attr.ib(
-        convert=lambda v: v if isinstance(v, Metadata) else Metadata(**v),
+        converter=lambda v: v if isinstance(v, Metadata) else Metadata(**v),
     )
     created = attr.ib()
     id = attr.ib(validator=attr.validators.instance_of(int))
@@ -258,7 +258,7 @@ class Deposition(Entity):
     title = attr.ib(default='')
     files = attr.ib(
         default=attr.Factory(list),
-        convert=lambda v: [vv if isinstance(vv, DepositionFile) else DepositionFile.from_dict(vv) for vv in v],
+        converter=lambda v: [vv if isinstance(vv, DepositionFile) else DepositionFile.from_dict(vv) for vv in v],
     )
     doi = attr.ib(default=None)
     doi_url = attr.ib(default=None)
