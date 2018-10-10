@@ -1,22 +1,16 @@
 """
 http://developers.zenodo.org/
 """
-import os
 import json
-import warnings
-try:
-    from http.client import responses as http_status
-except ImportError:
-    from httplib import responses as http_status
-try:  # pragma: no cover
-    import pathlib2 as pathlib
-except ImportError:  # pragma: no cover
-    import pathlib
-
+import os
+import pathlib
 import requests
+import warnings
+from http.client import responses as http_status
 from urllib3.exceptions import InsecurePlatformWarning, SNIMissingWarning
 
-from zenodoclient.models import Deposition, DepositionFile, PUBLISHED, UNSUBMITTED
+from zenodoclient.models import Deposition, DepositionFile, PUBLISHED, \
+    UNSUBMITTED
 from zenodoclient.util import md5
 
 warnings.simplefilter('once', SNIMissingWarning)
