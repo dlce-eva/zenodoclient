@@ -1,4 +1,6 @@
+import attr
 import pytest
+from datetime import datetime
 from mock import Mock
 
 from zenodoclient.models import check_controlled_vocabulary, \
@@ -6,7 +8,7 @@ from zenodoclient.models import check_controlled_vocabulary, \
     IMAGE_TYPES, ACCESS_RIGHTS, RELATION_TYPES, CONTRIBUTOR_TYPES, \
     check_regex, \
     check_list_of_objects, check_persons, check_access_right, check_iso639_3, \
-    Metadata
+    Metadata, Entity, Deposition
 
 
 def test_validators():
@@ -61,4 +63,58 @@ def test_validators():
 
 
 def test_metadata():
-    pass
+    mdd = Metadata().asdict()
+
+    assert mdd['upload_type'] == 'dataset'
+    assert mdd['publication_date'] == datetime.now().strftime('%Y-%m-%d')
+    assert mdd['access_right'] == 'open'
+    assert mdd['license'] == 'cc-by'
+    assert mdd['embargo_date'] == datetime.now().strftime('%Y-%m-%d')
+
+
+def test_entity():
+    e = Entity()
+
+    @attr.s
+    class TestEntity(Entity):
+        test = attr.ib({'test': None})
+
+    te = TestEntity(test='')
+    te.from_dict({'test': True})
+
+    with pytest.raises(AttributeError):
+        e.__str__()
+
+
+def test_deposition():
+    md = Metadata(creators=[{'name': 'Test Creator'}], title='Test Title',
+                  description='Test Description')
+    d = Deposition(metadata=md, id=0, created='', modified='', owner='',
+                   state='done', submitted=True)
+
+    d.validate_update()
+
+    empty_creator_d = Deposition(metadata=Metadata(), id=0, created='',
+                                 modified='', owner='', state='done',
+                                 submitted=True)
+
+    with pytest.raises(ValueError):
+        empty_creator_d.validate_update()
+
+    empty_title_d = Deposition(
+        metadata=Metadata(creators=[{'name': 'Test Creator'}]), id=0,
+        created='', modified='', owner='', state='done', submitted=True)
+
+    with pytest.raises(ValueError):
+        empty_title_d.validate_update()
+
+    emtpy_desc_d = Deposition(
+        metadata=Metadata(creators=[{'name': 'Test Creator'}],
+                          title='Test Title'), id=0, created='', modified='',
+        owner='', state='done', submitted=True)
+
+    with pytest.raises(ValueError):
+        emtpy_desc_d.validate_update()
+
+    with pytest.raises(ValueError):
+        d.validate_publish()
