@@ -85,7 +85,7 @@ class Zenodo(object):
                         "checksum": "md5:df25dbca677de8aa31bb728cb012116a",
                         "bucket": "d8bbe7e9-cdcc-4972-a415-dd56667cf7d7",
                         "links": {
-                            "self": "https://zenodo.org/api/files/d8bbe7e9-cdcc-4972-a415-dd56667cf7d7/dictionaria/nen-v1.0.zip"
+                            "self": "https.../nen-v1.0.zip"
                         }
                     }
                 ],
@@ -125,7 +125,7 @@ class Zenodo(object):
                             }
                         ]
                     },
-                    "description": "<p>Evans, Nicholas. 2019. Nen dictionary. Dictionaria 8. 1-5005 (Available online at <a href=\"https://matthew.clld.org/dictionaria/contributions/nen\">https://dictionaria.clld.org/contributions/nen</a>)</p>",
+                    "description": "<p>Evans, Nicholas. 2019. Nen diction...",
                     "resource_type": {
                         "title": "Dataset",
                         "type": "dataset"
@@ -279,13 +279,13 @@ class Zenodo(object):
         return dep
 
     #
-    # Deposition File API
+    # legacy Deposition File API
     #
-    def create_files(self, dep, *paths, **kw):
+    def create_files(self, dep, *paths, **kw):  # pragma: no cover
         for path in paths:
             yield self.create_file(dep, path, verify=kw.get('verify', True))
 
-    def create_file(self, dep, path, verify=True):
+    def create_file(self, dep, path, verify=True):  # pragma: no cover
         if dep.state != UNSUBMITTED:
             raise ValueError('files can only be uploaded for unsubmitted depositions')
         path = pathlib.Path(path)
@@ -305,12 +305,12 @@ class Zenodo(object):
         dep.files.append(res)
         return res
 
-    def list_files(self, dep):
+    def list_files(self, dep):  # pragma: no cover
         return [
             DepositionFile.from_dict(d) for d in
             self._req('get', path='{0}/files'.format(dep))]
 
-    def sort_files(self, dep, sorted_):
+    def sort_files(self, dep, sorted_):  # pragma: no cover
         res = self._req(
             'put',
             path='{0}/files'.format(dep),
@@ -318,14 +318,13 @@ class Zenodo(object):
         dep.files = [DepositionFile.from_dict(d) for d in res]
         return dep.files
 
-    def retrieve_file(self, dep, depfile):
-        return DepositionFile.from_dict(
-            self._req('get', path='{0}/files/{1}'.format(dep, depfile)))
+    def retrieve_file(self, dep, depfile):  # pragma: no cover
+        return DepositionFile.from_dict(self._req('get', path='{0}'.format(depfile)))
 
-    def update_file(self, dep, depfile, filename):
+    def update_file(self, dep, depfile, filename):  # pragma: no cover
         return DepositionFile.from_dict(self._req(
             'put', path='{0}/files/{1}'.format(dep, depfile), data={'filename': filename}
         ))
 
-    def delete_file(self, dep, depfile):
+    def delete_file(self, dep, depfile):  # pragma: no cover
         self._req('delete', path='{0}/files/{1}'.format(dep, depfile), expected=204)

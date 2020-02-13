@@ -23,14 +23,6 @@ def test_api():
     with pytest.raises(ValueError):
         api.publish(dep)
     files = list(api.create_files(dep, __file__, zenodoclient.api.__file__))
-    f = api.retrieve_file(dep, files[0])
-    assert len(api.list_files(dep)) == 2
-    api.sort_files(dep, [files[1], files[0]])
-    assert dep.files[-1].filename.startswith('test_integration')
-    api.delete_file(dep, f)
-    fs = api.list_files(dep)
-    assert len(fs) == 1
-    api.update_file(dep, fs[0], 'fname')
     dep = api.publish(dep)
     api.update(dep, title='abc other')
     dep = api.edit(dep)

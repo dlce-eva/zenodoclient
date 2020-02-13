@@ -222,7 +222,7 @@ class Metadata(object):
         res = {}
         for f in attr.fields(self.__class__):
             v = getattr(self, f.name)
-            if v or isinstance(v, bool):  # f.default != attr.NOTHING or isinstance(v, bool) or v is not None:
+            if v or isinstance(v, bool):
                 if isinstance(v, date):
                     v = v.isoformat()
                 res[f.name] = v
@@ -261,7 +261,8 @@ class Deposition(Entity):
     title = attr.ib(default='')
     files = attr.ib(
         default=attr.Factory(list),
-        converter=lambda v: [vv if isinstance(vv, DepositionFile) else DepositionFile.from_dict(vv) for vv in v],
+        converter=lambda v: [
+            vv if isinstance(vv, DepositionFile) else DepositionFile.from_dict(vv) for vv in v],
     )
     doi = attr.ib(default=None)
     doi_url = attr.ib(default=None)
@@ -287,3 +288,6 @@ class DepositionFile(Entity):
     filename = attr.ib()
     filesize = attr.ib()
     checksum = attr.ib()
+
+    def __str__(self):
+        return self.links['self']

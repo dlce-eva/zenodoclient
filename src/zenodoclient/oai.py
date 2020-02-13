@@ -11,6 +11,7 @@ DATACITE_NS = "http://datacite.org/schema/kernel-3"
 def qname(ns, lname):
     return '{%s}%s' % (ns, lname)
 
+
 oai = partial(qname, OAI_NS)
 datacite = partial(qname, DATACITE_NS)
 
@@ -68,7 +69,8 @@ def request(**params):
 class Records(list):
     def __init__(self, community):
         self.community = community
-        res = request(set='user-{0}'.format(community), metadataPrefix='oai_datacite', verb='ListRecords')
+        res = request(
+            set='user-{0}'.format(community), metadataPrefix='oai_datacite', verb='ListRecords')
         recs = res('record', method='findall')
         while res.resumption_token:
             res = request(verb='ListRecords', resumptionToken=res.resumption_token)
