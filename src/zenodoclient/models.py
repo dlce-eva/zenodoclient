@@ -55,18 +55,21 @@ ACCESS_RIGHTS = [
 ]
 
 RELATION_TYPES = [
-    'isCitedBy',
     'cites',
-    'isSupplementTo',
-    'isSupplementedBy',
+    'compiles',
+    'hasPart',
+    'isAlternateIdentifier',
+    'isCitedBy',
+    'isCompiledBy',
+    'isDerivedFrom',
+    'isDocumentedBy',
+    'isIdenticalTo',
     'isNewVersionOf',
     'isPreviousVersionOf',
     'isPartOf',
-    'hasPart',
-    'compiles',
-    'isCompiledBy',
-    'isIdenticalTo',
-    'isAlternateIdentifier',
+    'isSourceOf',
+    'isSupplementTo',
+    'isSupplementedBy',
 ]
 
 CONTRIBUTOR_TYPES = [
@@ -79,6 +82,7 @@ CONTRIBUTOR_TYPES = [
     'RightsHolder',
     'Sponsor',
     'Other',
+    'Distributor',
 ]
 
 
@@ -98,12 +102,12 @@ def check_list_of_objects(keys, instance, attribute, value):
     for v in value:
         # we expect a dict with no excess keys ...
         if not isinstance(v, dict) or any(k not in keys for k in v):
-            raise ValueError(attribute)
+            raise ValueError(attribute, value)
         # ... and all required keys.
         for key, expected in keys.items():
             if expected and (key not in v or (
                     isinstance(expected, list) and v[key] not in expected)):
-                raise ValueError(attribute)
+                raise ValueError(attribute, value)
 
 
 def check_persons(instance, attribute, value, with_type=None):
@@ -172,7 +176,7 @@ class Metadata(object):
         default=attr.Factory(list),
         validator=partial(
             check_list_of_objects,
-            dict(scheme=True, identifier=True, relation=RELATION_TYPES))
+            dict(scheme=True, identifier=True, relation=RELATION_TYPES, resource_type=False))
     )
     contributors = attr.ib(
         default=attr.Factory(list),
@@ -225,6 +229,7 @@ class Metadata(object):
         return res
 
 
+@attr.s
 class Entity(object):
     def __str__(self):
         """
@@ -278,7 +283,7 @@ class Deposition(Entity):
 
 @attr.s
 class DepositionFile(Entity):
-    id = attr.ib()
+    links = attr.ib()
     filename = attr.ib()
     filesize = attr.ib()
     checksum = attr.ib()
