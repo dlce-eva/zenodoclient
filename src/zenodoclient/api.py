@@ -67,6 +67,147 @@ class Zenodo(object):
             response.json() if 400 <= response.status_code < 500 else None)
 
     #
+    # Records API
+    #
+    def search(self, keywords=None, limit=None, **kw):
+        """
+        "https://zenodo.org/api/records/?sort=mostrecent&page=2&keywords=cldf&size=2",
+{
+    "hits": {
+        "total": 4,
+        "hits": [
+            {
+                "files": [
+                    {
+                        "key": "dictionaria/nen-v1.0.zip",
+                        "size": 421044,
+                        "type": "zip",
+                        "checksum": "md5:df25dbca677de8aa31bb728cb012116a",
+                        "bucket": "d8bbe7e9-cdcc-4972-a415-dd56667cf7d7",
+                        "links": {
+                            "self": "https://zenodo.org/api/files/d8bbe7e9-cdcc-4972-a415-dd56667cf7d7/dictionaria/nen-v1.0.zip"
+                        }
+                    }
+                ],
+                "created": "2019-07-22T14:04:43.573452+00:00",
+                "conceptdoi": "10.5281/zenodo.3345804",
+                "metadata": {
+                    "keywords": [
+                        "linguistics",
+                        "CLDF"
+                    ],
+                    "related_identifiers": [
+                        {
+                            "scheme": "url",
+                            "relation": "isSupplementTo",
+                            "identifier": "https://github.com/dictionaria/nen/tree/v1.0"
+                        },
+                        {
+                            "scheme": "doi",
+                            "relation": "isVersionOf",
+                            "identifier": "10.5281/zenodo.3345804"
+                        }
+                    ],
+                    "relations": {
+                        "version": [
+                            {
+                                "count": 1,
+                                "last_child": {
+                                    "pid_value": "3345805",
+                                    "pid_type": "recid"
+                                },
+                                "index": 0,
+                                "is_last": true,
+                                "parent": {
+                                    "pid_value": "3345804",
+                                    "pid_type": "recid"
+                                }
+                            }
+                        ]
+                    },
+                    "description": "<p>Evans, Nicholas. 2019. Nen dictionary. Dictionaria 8. 1-5005 (Available online at <a href=\"https://matthew.clld.org/dictionaria/contributions/nen\">https://dictionaria.clld.org/contributions/nen</a>)</p>",
+                    "resource_type": {
+                        "title": "Dataset",
+                        "type": "dataset"
+                    },
+                    "creators": [
+                        {
+                            "name": "Nicholas Evans",
+                            "affiliation": "Australian National University"
+                        }
+                    ],
+                    "publication_date": "2019-07-22",
+                    "access_right_category": "success",
+                    "license": {
+                        "id": "CC-BY-4.0"
+                    },
+                    "version": "v1.0",
+                    "communities": [
+                        {
+                            "id": "cldf-datasets"
+                        },
+                        {
+                            "id": "clld"
+                        },
+                        {
+                            "id": "dictionaria"
+                        }
+                    ],
+                    "doi": "10.5281/zenodo.3345805",
+                    "title": "dictionaria/nen: Nen Dictionary",
+                    "access_right": "open"
+                },
+                "id": 3345805,
+                "owners": [
+                    46881
+                ],
+                "conceptrecid": "3345804",
+                "stats": {
+                    "views": 3.0,
+                    "version_unique_downloads": 3.0,
+                    "volume": 1263132.0,
+                    "version_views": 3.0,
+                    "unique_views": 1.0,
+                    "unique_downloads": 3.0,
+                    "version_unique_views": 1.0,
+                    "version_volume": 1263132.0,
+                    "downloads": 3.0,
+                    "version_downloads": 3.0
+                },
+                "revision": 6,
+                "updated": "2019-07-22T19:05:49.975603+00:00",
+                "links": {
+                    "conceptdoi": "https://doi.org/10.5281/zenodo.3345804",
+                    "html": "https://zenodo.org/record/3345805",
+                    "badge": "https://zenodo.org/badge/doi/10.5281/zenodo.3345805.svg",
+                    "bucket": "https://zenodo.org/api/files/d8bbe7e9-cdcc-4972-a415-dd56667cf7d7",
+                    "latest": "https://zenodo.org/api/records/3345805",
+                    "doi": "https://doi.org/10.5281/zenodo.3345805",
+                    "latest_html": "https://zenodo.org/record/3345805",
+                    "conceptbadge": "https://zenodo.org/badge/doi/10.5281/zenodo.3345804.svg",
+                    "self": "https://zenodo.org/api/records/3345805"
+                },
+                "doi": "10.5281/zenodo.3345805"
+            }
+        ],
+
+
+           "links": {
+        "next": "https://zenodo.org/api/records/?sort=mostrecent&page=2&keywords=cldf&size=2",
+        "self": "https://zenodo.org/api/records/?sort=mostrecent&page=1&keywords=cldf&size=2"
+    },
+
+        :return:
+        """
+        recs = []
+        res = self._req('get', prefix='records', path='/', params=dict(keywords=keywords))
+        recs.extend(res['hits']['hits'])
+        while ('next' in res['links']) and len(recs) < limit:
+            res = requests.get(res['links']['next']).json()
+            recs.extend(res['hits']['hits'])
+        return recs[:limit]
+
+    #
     # Deposition API
     #
     def list(self, q=None, status=None, sort=None, page=None, size=10):
@@ -78,8 +219,9 @@ class Zenodo(object):
         for i, d in enumerate(self.list(
                 q=q, status=status, sort=sort, page=page, size=size)):
             yield d
-        while i + 1 == size:
+        while i:
             page += 1
+            i = 0
             for i, d in enumerate(self.list(
                     q=q, status=status, sort=sort, page=page, size=size)):
                 yield d
@@ -123,6 +265,7 @@ class Zenodo(object):
         # We automatically unlock published Depositions for editing:
         published = dep.state == PUBLISHED
         if published:
+            print('unlock for editing')
             dep = self.edit(dep)
 
         for k, v in kw.items():
@@ -131,6 +274,7 @@ class Zenodo(object):
 
         dep = self._update(dep)
         if published:
+            print('publish changes')
             dep = self.publish(dep)
         return dep
 
