@@ -1,17 +1,25 @@
 """
 http://developers.zenodo.org/
 """
-import json
 import os
+import re
+import json
+import shutil
 import pathlib
+import zipfile
 import requests
+import tempfile
 import warnings
 from http.client import responses as http_status
+import urllib.request
+
 from urllib3.exceptions import InsecurePlatformWarning, SNIMissingWarning
+from bs4 import BeautifulSoup as bs
 
 from zenodoclient.models import Deposition, DepositionFile, PUBLISHED, \
-    UNSUBMITTED
+    UNSUBMITTED, Record
 from zenodoclient.util import md5
+from zenodoclient import oai
 
 warnings.simplefilter('once', SNIMissingWarning)
 warnings.simplefilter('once', InsecurePlatformWarning)
@@ -69,204 +77,122 @@ class Zenodo(object):
     #
     # Records API
     #
-    def search(self, keywords=None, limit=None, **kw):
+    def download_record(self, rec, outdir):
+        outdir = pathlib.Path(outdir) / rec.doi.split('/')[1]
+        if outdir.exists():
+            return outdir
+        outdir.mkdir()
+        for f in rec.files:
+            with tempfile.TemporaryDirectory() as tmp:
+                fname = pathlib.Path(tmp) / f.key.split('/')[-1]
+                urllib.request.urlretrieve(f.url, str(fname))
+                if f.checksum_protocol == 'md5':
+                    assert md5(fname) == f.checksum_value
+                if f.type == 'zip':
+                    z = zipfile.ZipFile(str(fname))
+                    z.extractall(str(outdir))
+                elif f.type == 'gz':
+                    # what about a tar in there?
+                    raise NotImplementedError()
+                elif f.type == 'gz':
+                    raise NotImplementedError()
+                else:
+                    shutil.move(str(fname), str(outdir / f.key.split('/')[-1]))
+        return outdir
+
+    def record_from_id(self, id_):
+        if not id_.startswith('http'):
+            id_ = 'https://zenodo.org/record/' + id_
+        soup = bs(requests.get(id_ + '/export/json').text, 'html.parser')
+        return Record(**json.loads(soup.find('pre').text))
+
+    def record_from_doi(self, doi):
+        if not doi.startswith('http'):
+            doi = 'https://doi.org/{0}'.format(doi)
+        res = requests.get(doi)
+        assert re.search('zenodo.org/record/[0-9]+$', res.url)
+        return self.record_from_id(res.url)
+
+    def iter_records(self, keywords=None, limit=None, community=None, **kw):
         """
         "https://zenodo.org/api/records/?sort=mostrecent&page=2&keywords=cldf&size=2",
-{
-    "hits": {
-        "total": 4,
-        "hits": [
-            {
-                "files": [
-                    {
-                        "key": "dictionaria/nen-v1.0.zip",
-                        "size": 421044,
-                        "type": "zip",
-                        "checksum": "md5:df25dbca677de8aa31bb728cb012116a",
-                        "bucket": "d8bbe7e9-cdcc-4972-a415-dd56667cf7d7",
-                        "links": {
-                            "self": "https.../nen-v1.0.zip"
-                        }
-                    }
-                ],
-                "created": "2019-07-22T14:04:43.573452+00:00",
-                "conceptdoi": "10.5281/zenodo.3345804",
-                "metadata": {
-                    "keywords": [
-                        "linguistics",
-                        "CLDF"
-                    ],
-                    "related_identifiers": [
-                        {
-                            "scheme": "url",
-                            "relation": "isSupplementTo",
-                            "identifier": "https://github.com/dictionaria/nen/tree/v1.0"
-                        },
-                        {
-                            "scheme": "doi",
-                            "relation": "isVersionOf",
-                            "identifier": "10.5281/zenodo.3345804"
-                        }
-                    ],
-                    "relations": {
-                        "version": [
-                            {
-                                "count": 1,
-                                "last_child": {
-                                    "pid_value": "3345805",
-                                    "pid_type": "recid"
-                                },
-                                "index": 0,
-                                "is_last": true,
-                                "parent": {
-                                    "pid_value": "3345804",
-                                    "pid_type": "recid"
-                                }
-                            }
-                        ]
-                    },
-                    "description": "<p>Evans, Nicholas. 2019. Nen diction...",
-                    "resource_type": {
-                        "title": "Dataset",
-                        "type": "dataset"
-                    },
-                    "creators": [
-                        {
-                            "name": "Nicholas Evans",
-                            "affiliation": "Australian National University"
-                        }
-                    ],
-                    "publication_date": "2019-07-22",
-                    "access_right_category": "success",
-                    "license": {
-                        "id": "CC-BY-4.0"
-                    },
-                    "version": "v1.0",
-                    "communities": [
-                        {
-                            "id": "cldf-datasets"
-                        },
-                        {
-                            "id": "clld"
-                        },
-                        {
-                            "id": "dictionaria"
-                        }
-                    ],
-                    "doi": "10.5281/zenodo.3345805",
-                    "title": "dictionaria/nen: Nen Dictionary",
-                    "access_right": "open"
-                },
-                "id": 3345805,
-                "owners": [
-                    46881
-                ],
-                "conceptrecid": "3345804",
-                "stats": {
-                    "views": 3.0,
-                    "version_unique_downloads": 3.0,
-                    "volume": 1263132.0,
-                    "version_views": 3.0,
-                    "unique_views": 1.0,
-                    "unique_downloads": 3.0,
-                    "version_unique_views": 1.0,
-                    "version_volume": 1263132.0,
-                    "downloads": 3.0,
-                    "version_downloads": 3.0
-                },
-                "revision": 6,
-                "updated": "2019-07-22T19:05:49.975603+00:00",
-                "links": {
-                    "conceptdoi": "https://doi.org/10.5281/zenodo.3345804",
-                    "html": "https://zenodo.org/record/3345805",
-                    "badge": "https://zenodo.org/badge/doi/10.5281/zenodo.3345805.svg",
-                    "bucket": "https://zenodo.org/api/files/d8bbe7e9-cdcc-4972-a415-dd56667cf7d7",
-                    "latest": "https://zenodo.org/api/records/3345805",
-                    "doi": "https://doi.org/10.5281/zenodo.3345805",
-                    "latest_html": "https://zenodo.org/record/3345805",
-                    "conceptbadge": "https://zenodo.org/badge/doi/10.5281/zenodo.3345804.svg",
-                    "self": "https://zenodo.org/api/records/3345805"
-                },
-                "doi": "10.5281/zenodo.3345805"
-            }
-        ],
-
-
-           "links": {
-        "next": "https://zenodo.org/api/records/?sort=mostrecent&page=2&keywords=cldf&size=2",
-        "self": "https://zenodo.org/api/records/?sort=mostrecent&page=1&keywords=cldf&size=2"
-    },
-
-        :return:
         """
-        recs = []
+        if community:
+            for rec in oai.Records(community):
+                if not keywords or (keywords in rec.keywords):
+                    yield self.record_from_id(rec.id)
+            return
+
+        i = 0
         res = self._req('get', prefix='records', path='/', params=dict(keywords=keywords))
-        recs.extend(res['hits']['hits'])
-        while ('next' in res['links']) and len(recs) < limit:
+        for i, rec in enumerate(res['hits']['hits'][:limit], start=1):
+            yield Record(**rec)
+        while ('next' in res['links']) and i < limit:
             res = requests.get(res['links']['next']).json()
-            recs.extend(res['hits']['hits'])
-        return recs[:limit]
+            for i, rec in enumerate(res['hits']['hits'], start=i):
+                if i <= limit:
+                    yield Record(**rec)
 
     #
     # Deposition API
     #
-    def list(self, q=None, status=None, sort=None, page=None, size=10):
+    def list_deposits(self, q=None, status=None, sort=None, page=None, size=10):
         params = {k: v for k, v in locals().items() if k != 'self' and v}
         return [Deposition.from_dict(d) for d in self._req('get', params=params)]
 
-    def iter(self, q=None, status=None, sort=None):
+    def iter_deposits(self, q=None, status=None, sort=None):
         page, size, i = 1, 10, 0
-        for i, d in enumerate(self.list(
+        for i, d in enumerate(self.list_deposits(
                 q=q, status=status, sort=sort, page=page, size=size)):
             yield d
         while i:
             page += 1
             i = 0
-            for i, d in enumerate(self.list(
+            for i, d in enumerate(self.list_deposits(
                     q=q, status=status, sort=sort, page=page, size=size)):
                 yield d
 
     def _dep(self, method, **kw):
         return Deposition.from_dict(self._req(method, **kw))
 
-    def create(self, **md):
+    def create_deposit(self, **md):
         res = self._dep('post', expected=201, data={})
         # FIXME: Should we immediately discard the deposition if updating fails?
-        return self.update(res, **md) if md else res
+        return self.update_deposit(res, **md) if md else res
 
     def _update(self, dep):
         dep.validate_update()
         return self._dep(
             'put', path='{0}'.format(dep), data={'metadata': dep.metadata.asdict()})
 
-    def retrieve(self, dep):
+    def retrieve_deposit(self, dep):
         return self._dep('get', path='{0}'.format(dep))
 
-    def delete(self, dep):
+    def delete_deposit(self, dep):
         self._req('delete', path='{0}'.format(dep), expected=201)
 
-    def publish(self, dep):
+    def publish_deposit(self, dep):
         dep.validate_publish()
         return self._dep('post', path='{0}/actions/publish'.format(dep), expected=202)
 
-    def edit(self, dep):
+    def edit_deposit(self, dep):
         return self._dep('post', path='{0}/actions/edit'.format(dep), expected=201)
 
-    def discard(self, dep):
+    def discard_deposit(self, dep):
         return self._dep('post', path='{0}/actions/discard'.format(dep), expected=201)
 
-    def newversion(self, dep):
+    def newversion_deposit(self, dep):
         return self._dep('post', path='{0}/actions/newversion'.format(dep), expected=201)
 
-    def update(self, dep, **kw):
+    def update_deposit(self, dep, **kw):
         if not isinstance(dep, Deposition):
-            dep = self.retrieve(dep)
+            dep = self.retrieve_deposit(dep)
 
         # We automatically unlock published Depositions for editing:
         published = dep.state == PUBLISHED
         if published:
             print('unlock for editing')
-            dep = self.edit(dep)
+            dep = self.edit_deposit(dep)
 
         for k, v in kw.items():
             # Set the metadata attributes, thereby triggering validators:
@@ -275,7 +201,7 @@ class Zenodo(object):
         dep = self._update(dep)
         if published:
             print('publish changes')
-            dep = self.publish(dep)
+            dep = self.publish_deposit(dep)
         return dep
 
     #

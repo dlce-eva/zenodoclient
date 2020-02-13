@@ -49,6 +49,18 @@ class Record:
         self.identifier = self.e.find('.//{0}'.format(oai('identifier')))
         self.metadata = Metadata(self.e.find('.//{0}'.format(datacite('resource'))))
 
+    @property
+    def id(self):
+        return self.identifier.text.split(':')[-1]
+
+    @property
+    def doi(self):
+        return self.metadata.identifier.text
+
+    @property
+    def keywords(self):
+        return [e.text for e in self.metadata.subjects]
+
 
 class OAIXML:
     def __init__(self, xml):

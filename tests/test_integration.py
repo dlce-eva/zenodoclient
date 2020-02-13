@@ -15,17 +15,17 @@ def test_api():
     if not at:
         return
     api = Zenodo(api_url=API_URL_SANDBOX, access_token=at)
-    dep = api.create(title='title', creators=[{'name': 'Doe, John'}],
+    dep = api.create_deposit(title='title', creators=[{'name': 'Doe, John'}],
                      description='desc')
     assert dep.metadata.title == 'title'
-    dep = api.update(dep, title='other')
+    dep = api.update_deposit(dep, title='other')
     assert dep.metadata.title == 'other'
     with pytest.raises(ValueError):
-        api.publish(dep)
+        api.publish_deposit(dep)
     files = list(api.create_files(dep, __file__, zenodoclient.api.__file__))
-    dep = api.publish(dep)
-    api.update(dep, title='abc other')
-    dep = api.edit(dep)
+    dep = api.publish_deposit(dep)
+    api.update_deposit(dep, title='abc other')
+    dep = api.edit_deposit(dep)
     with pytest.raises(ValueError):
         api.create_file(dep, zenodoclient.__file__)
-    api.update(dep, title='abc other')
+    api.update_deposit(dep, title='abc other')

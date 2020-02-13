@@ -4,6 +4,8 @@ from datetime import date
 
 import attr
 
+__all__ = ['Record', 'Deposition', 'DepositionFile']
+
 UPLOAD_TYPES = [
     'publication',
     'poster',
@@ -70,6 +72,7 @@ RELATION_TYPES = [
     'isSourceOf',
     'isSupplementTo',
     'isSupplementedBy',
+    'isVersionOf',
 ]
 
 CONTRIBUTOR_TYPES = [
@@ -127,6 +130,12 @@ def check_iso639_3(instance, attribute, value):
         raise ValueError('invalid ISO 639-3 code')
 
 
+def convert_grant(d):
+    if 'links' in d and 'id' not in d:
+        d['id'] = d['links']['self']
+    return d
+
+
 @attr.s
 class Metadata(object):
     upload_type = attr.ib(
@@ -143,6 +152,7 @@ class Metadata(object):
     access_right = attr.ib(
         default='open',
         validator=attr.validators.in_(ACCESS_RIGHTS))
+    access_right_category = attr.ib(default=None)
     publication_type = attr.ib(
         default=None,
         validator=partial(
@@ -184,11 +194,22 @@ class Metadata(object):
     references = attr.ib(default=attr.Factory(list))
     communities = attr.ib(
         default=attr.Factory(list),
+        converter=lambda l: [{'identifier': d.get('id', d.get('identifier'))} for d in l],
         validator=partial(check_list_of_objects, dict(identifier=True))
     )
     grants = attr.ib(
         default=attr.Factory(list),
-        validator=partial(check_list_of_objects, dict(id=True))
+        converter=lambda l: [convert_grant(d) for d in l],
+        validator=partial(
+            check_list_of_objects,
+            dict(
+                id=True,
+                code=False,
+                program=False,
+                acronym=False,
+                funder=False,
+                links=False,
+                title=False))
     )
     journal_title = attr.ib(default='')
     journal_volume = attr.ib(default='')
@@ -217,6 +238,9 @@ class Metadata(object):
     language = attr.ib(
         default=None,
         validator=attr.validators.optional(check_iso639_3))
+    relations = attr.ib(default=None)
+    resource_type = attr.ib(default=None)
+    alternate_identifiers = attr.ib(default=None)
 
     def asdict(self):
         res = {}
@@ -227,6 +251,46 @@ class Metadata(object):
                     v = v.isoformat()
                 res[f.name] = v
         return res
+
+
+@attr.s
+class RecordFile(object):
+    links = attr.ib()
+    bucket = attr.ib()
+    key = attr.ib()
+    type = attr.ib()
+    size = attr.ib()
+    checksum = attr.ib(
+        converter=lambda s: s.split(':'),
+        validator=attr.validators.instance_of(list))
+
+    @property
+    def checksum_protocol(self):
+        return self.checksum[0]
+
+    @property
+    def checksum_value(self):
+        return self.checksum[1]
+
+    @property
+    def url(self):
+        return self.links['self']
+
+
+@attr.s
+class Record(object):
+    files = attr.ib(converter=lambda l: [RecordFile(**f) for f in l])
+    owners = attr.ib()
+    doi = attr.ib()
+    stats = attr.ib()
+    links = attr.ib()
+    conceptdoi = attr.ib()
+    created = attr.ib()
+    updated = attr.ib()
+    conceptrecid = attr.ib()
+    revision = attr.ib()
+    id = attr.ib()
+    metadata = attr.ib(converter=lambda d: Metadata(**d))
 
 
 @attr.s
@@ -289,5 +353,5 @@ class DepositionFile(Entity):
     filesize = attr.ib()
     checksum = attr.ib()
 
-    def __str__(self):
+    def __str__(self):  # pragma: no cover
         return self.links['self']

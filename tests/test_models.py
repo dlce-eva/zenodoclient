@@ -3,12 +3,15 @@ import pytest
 from datetime import datetime
 from mock import Mock
 
-from zenodoclient.models import check_controlled_vocabulary, \
-    PUBLICATION_TYPES, \
-    IMAGE_TYPES, ACCESS_RIGHTS, RELATION_TYPES, CONTRIBUTOR_TYPES, \
-    check_regex, \
-    check_list_of_objects, check_persons, check_access_right, check_iso639_3, \
-    Metadata, Entity, Deposition
+from zenodoclient.models import (
+    check_controlled_vocabulary,
+    PUBLICATION_TYPES,
+    IMAGE_TYPES, ACCESS_RIGHTS, RELATION_TYPES, CONTRIBUTOR_TYPES,
+    check_regex,
+    check_list_of_objects, check_persons, check_access_right, check_iso639_3,
+    Metadata, Entity, Deposition,
+    RecordFile,
+)
 
 
 def test_validators():
@@ -63,13 +66,27 @@ def test_validators():
 
 
 def test_metadata():
-    mdd = Metadata().asdict()
+    mdd = Metadata(grants=[{'links': {'self': 'x'}}]).asdict()
 
+    assert mdd['grants'][0]['id'] == 'x'
     assert mdd['upload_type'] == 'dataset'
     assert mdd['publication_date'] == datetime.now().strftime('%Y-%m-%d')
     assert mdd['access_right'] == 'open'
     assert mdd['license'] == 'cc-by'
     assert mdd['embargo_date'] == datetime.now().strftime('%Y-%m-%d')
+
+
+def test_RecordFile():
+    rf = RecordFile(
+        links={'self': 'x'},
+        bucket=None,
+        key=None,
+        type=None,
+        size=None,
+        checksum='md5:1234')
+    assert rf.checksum_protocol == 'md5'
+    assert rf.checksum_value == '1234'
+    assert rf.url == 'x'
 
 
 def test_entity():

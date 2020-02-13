@@ -22,6 +22,7 @@ setup(
     install_requires=[
         'requests',
         'attrs>=18.2',
+        'bs4',
     ],
     extras_require={
         'dev': ['flake8', 'wheel', 'twine'],
