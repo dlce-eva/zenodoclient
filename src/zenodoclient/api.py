@@ -39,6 +39,9 @@ class ApiError(Exception):
 
 
 class Zenodo(object):
+
+    DOI_PATTERN = re.compile(r'10\.5281/zenodo\.(?P<id>[0-9]+)$')
+
     def __init__(self, access_token=ACCESS_TOKEN, api_url=API_URL):
         self._access_token = access_token
         self._api_url = api_url
