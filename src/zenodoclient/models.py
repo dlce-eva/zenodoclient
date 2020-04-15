@@ -1,6 +1,7 @@
 import re
 from functools import partial
 from datetime import date
+import collections
 
 import attr
 
@@ -89,6 +90,24 @@ CONTRIBUTOR_TYPES = [
 ]
 
 
+def _to_val(v):
+    if hasattr(v, 'to_dict'):
+        return v.to_dict()
+    if isinstance(v, date):
+        v = v.isoformat()
+    if isinstance(v, list):
+        v = [_to_val(vv) for vv in v]
+    if isinstance(v, dict):
+        v = collections.OrderedDict([(k, v) for k, v in sorted(v.items(), key=lambda i: i[0])])
+    return v
+
+
+class Serializable:
+    def to_dict(self):
+        return collections.OrderedDict(
+            [(f.name, _to_val(getattr(self, f.name))) for f in attr.fields(self.__class__)])
+
+
 def check_controlled_vocabulary(vocab, condition, instance, attribute, value):
     if condition(instance) and value not in vocab:
         raise ValueError('invalid {0}'.format(attribute))
@@ -137,7 +156,7 @@ def convert_grant(d):
 
 
 @attr.s
-class Metadata(object):
+class Metadata(Serializable):
     upload_type = attr.ib(
         default='dataset',
         validator=attr.validators.in_(UPLOAD_TYPES))
@@ -254,7 +273,7 @@ class Metadata(object):
 
 
 @attr.s
-class RecordFile(object):
+class RecordFile(Serializable):
     links = attr.ib()
     bucket = attr.ib()
     key = attr.ib()
@@ -278,7 +297,7 @@ class RecordFile(object):
 
 
 @attr.s
-class Record(object):
+class Record(Serializable):
     files = attr.ib(converter=lambda l: [RecordFile(**f) for f in l])
     owners = attr.ib()
     doi = attr.ib()
@@ -294,7 +313,7 @@ class Record(object):
 
 
 @attr.s
-class Entity(object):
+class Entity(Serializable):
     def __str__(self):
         """
         To simplify formatting of API URLs, the string representation of entities is their

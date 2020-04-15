@@ -139,20 +139,25 @@ class Zenodo(object):
     #
     # Deposition API
     #
-    def list_deposits(self, q=None, status=None, sort=None, page=None, size=10):
+    def list_deposits(self, q=None, status=None, sort=None, page=None, size=10, all_versions=False):
         params = {k: v for k, v in locals().items() if k != 'self' and v}
         return [Deposition.from_dict(d) for d in self._req('get', params=params)]
 
-    def iter_deposits(self, q=None, status=None, sort=None):
+    def iter_deposits(self, q=None, status=None, sort=None, all_versions=False):
         page, size, i = 1, 10, 0
         for i, d in enumerate(self.list_deposits(
-                q=q, status=status, sort=sort, page=page, size=size)):
+                q=q, status=status, sort=sort, page=page, size=size, all_versions=all_versions)):
             yield d
         while i:
             page += 1
             i = 0
             for i, d in enumerate(self.list_deposits(
-                    q=q, status=status, sort=sort, page=page, size=size)):
+                    q=q,
+                    status=status,
+                    sort=sort,
+                    page=page,
+                    size=size,
+                    all_versions=all_versions)):
                 yield d
 
     def _dep(self, method, **kw):

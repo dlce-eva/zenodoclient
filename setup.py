@@ -16,12 +16,12 @@ setup(
     package_dir={'': 'src'},
     include_package_data=True,
     zip_safe=False,
-    entry_points={},
     platforms='any',
     python_requires='>=3.5',
     install_requires=[
         'requests',
         'attrs>=18.2',
+        'clldutils>=3.5',
         'bs4',
     ],
     extras_require={
@@ -46,4 +46,9 @@ setup(
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy'
     ],
+    entry_points={
+        'console_scripts': [
+            'zenodo=zenodoclient.__main__:main',
+        ]
+    },
 )
