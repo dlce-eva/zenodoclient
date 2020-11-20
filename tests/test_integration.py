@@ -10,6 +10,7 @@ warnings.simplefilter('ignore', SNIMissingWarning)
 warnings.simplefilter('ignore', InsecurePlatformWarning)
 
 
+@pytest.mark.webtest
 def test_api():
     at = os.environ.get('ZENODO_SANDBOX_ACCESS_TOKEN')
     if not at:
