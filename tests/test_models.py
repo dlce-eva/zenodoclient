@@ -1,7 +1,7 @@
 import attr
 import pytest
 from datetime import datetime
-from mock import Mock
+from unittest.mock import Mock
 
 from zenodoclient.models import (
     check_controlled_vocabulary,
