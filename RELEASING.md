@@ -7,7 +7,6 @@ Releasing zenodoclient
 tox -r
 ```
 
-- Make sure statement coverage >= 99%
 - Make sure flake8 passes:
 ```
 flake8 src

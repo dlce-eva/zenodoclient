@@ -1,5 +1,11 @@
+"""
+Read metadata from Zenodo via a community's OAI-PMH feed.
+"""
+import re
+import functools
+import collections
+import packaging.version
 from xml.etree import ElementTree as ET
-from functools import partial
 
 import requests
 
@@ -12,8 +18,8 @@ def qname(ns, lname):
     return '{%s}%s' % (ns, lname)
 
 
-oai = partial(qname, OAI_NS)
-datacite = partial(qname, DATACITE_NS)
+oai = functools.partial(qname, OAI_NS)
+datacite = functools.partial(qname, DATACITE_NS)
 
 
 class Metadata(object):
@@ -43,11 +49,35 @@ class Metadata(object):
         return [Metadata(e) for e in (parent or self.e).findall(self._path(lname))]
 
 
+Repository = collections.namedtuple('Repository', ['org', 'repos'])
+
+
 class Record:
     def __init__(self, e):
         self.e = e
         self.identifier = self.e.find('.//{0}'.format(oai('identifier')))
         self.metadata = Metadata(self.e.find('.//{0}'.format(datacite('resource'))))
+        self.repos = Repository(None, None)
+        self.tag = None
+        self.version = None
+        repos_url_pattern = re.compile(
+            r"https://github\.com/(?P<org>[^/]+)/(?P<repos>[^/]+)/tree/(?P<tag>.+)")
+        for o in self.metadata.relatedIdentifiers:
+            if o['relatedIdentifierType'] == 'URL':
+                match = repos_url_pattern.match(o.text)
+                if match:
+                    self.repos = Repository(match.group('org'), match.group('repos'))
+                    self.tag = match.group('tag')
+                    self.version = packaging.version.parse(self.tag)
+                    break
+
+    @property
+    def citation(self):
+        for line in requests.get('https://zenodo.org/record/{}'.format(self.id)).text.split('\n'):
+            if 'vm.citationResult' in line:
+                line = line.split("'", maxsplit=1)[1]
+                assert line.endswith("'\"")
+                return line[:-2]
 
     @property
     def id(self):
@@ -84,7 +114,7 @@ class Records(list):
         res = request(
             set='user-{0}'.format(community), metadataPrefix='oai_datacite', verb='ListRecords')
         recs = res('record', method='findall')
-        while res.resumption_token:
+        while res.resumption_token:  # pragma: no cover
             res = request(verb='ListRecords', resumptionToken=res.resumption_token)
             recs.extend(res('record', method='findall'))
         list.__init__(self, [Record(e) for e in recs])

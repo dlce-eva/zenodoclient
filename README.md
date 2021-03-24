@@ -2,7 +2,6 @@
 
 [![Build Status](https://github.com/shh-dlce/zenodoclient/workflows/tests/badge.svg)](https://github.com/shh-dlce/zenodoclient/actions?query=workflow%3Atests)
 [![codecov](https://codecov.io/gh/shh-dlce/zenodoclient/branch/master/graph/badge.svg)](https://codecov.io/gh/shh-dlce/zenodoclient)
-[![Requirements Status](https://requires.io/github/cldf/zenodoclient/requirements.svg?branch=master)](https://requires.io/github/cldf/zenodoclient/requirements/?branch=master)
 [![PyPI](https://img.shields.io/pypi/v/zenodoclient.svg)](https://pypi.org/project/zenodoclient)
 
 # Usage
