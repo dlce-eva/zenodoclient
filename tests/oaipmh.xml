@@ -1,0 +1,169 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<?xml-stylesheet type="text/xsl" href="/static/xsl/oai2.xsl"?>
+<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
+  <responseDate>2021-03-24T08:47:35Z</responseDate>
+  <request verb="ListRecords" set="user-tular" metadataPrefix="oai_datacite">https://zenodo.org/oai2d</request>
+  <ListRecords>
+    <record>
+      <header>
+        <identifier>oai:zenodo.org:4629306</identifier>
+        <datestamp>2021-03-23T12:27:24Z</datestamp>
+        <setSpec>openaire_data</setSpec>
+        <setSpec>user-lexibank</setSpec>
+        <setSpec>user-tular</setSpec>
+      </header>
+      <metadata>
+        <oai_datacite xmlns="http://schema.datacite.org/oai/oai-1.0/" xsi:schemaLocation="http://schema.datacite.org/oai/oai-1.0/ oai_datacite.xsd">
+          <isReferenceQuality>true</isReferenceQuality>
+          <schemaVersion>3.1</schemaVersion>
+          <datacentreSymbol>CERN.ZENODO</datacentreSymbol>
+          <payload>
+            <resource xmlns="http://datacite.org/schema/kernel-3" xsi:schemaLocation="http://datacite.org/schema/kernel-3 http://schema.datacite.org/meta/kernel-3/metadata.xsd">
+              <identifier identifierType="DOI">10.5281/zenodo.4629306</identifier>
+              <creators>
+                <creator>
+                  <creatorName>Fabrício Ferraz Gerardi</creatorName>
+                </creator>
+                <creator>
+                  <creatorName>Stanislav Reichert</creatorName>
+                </creator>
+                <creator>
+                  <creatorName>Carolina Aragon</creatorName>
+                </creator>
+                <creator>
+                  <creatorName>Johann-Mattis List</creatorName>
+                </creator>
+                <creator>
+                  <creatorName>Tim Wientzek</creatorName>
+                </creator>
+              </creators>
+              <titles>
+                <title>TuLeD: Tupían lexical database</title>
+              </titles>
+              <publisher>Zenodo</publisher>
+              <publicationYear>2021</publicationYear>
+              <subjects>
+                <subject>cldf:Wordlist</subject>
+                <subject>linguistics</subject>
+              </subjects>
+              <contributors>
+                <contributor contributorType="Other">
+                  <contributorName>Tiago Tresoldi</contributorName>
+                </contributor>
+                <contributor contributorType="DataCurator">
+                  <contributorName>Robert Forkel</contributorName>
+                </contributor>
+              </contributors>
+              <dates>
+                <date dateType="Issued">2021-03-23</date>
+              </dates>
+              <resourceType resourceTypeGeneral="Dataset"/>
+              <relatedIdentifiers>
+                <relatedIdentifier relatedIdentifierType="URL" relationType="IsSupplementTo">https://github.com/tupian-language-resources/tuled/tree/v0.11</relatedIdentifier>
+                <relatedIdentifier relatedIdentifierType="DOI" relationType="IsPartOf">10.5281/zenodo.4161622</relatedIdentifier>
+                <relatedIdentifier relatedIdentifierType="URL" relationType="IsPartOf">https://zenodo.org/communities/lexibank</relatedIdentifier>
+                <relatedIdentifier relatedIdentifierType="URL" relationType="IsPartOf">https://zenodo.org/communities/tular</relatedIdentifier>
+              </relatedIdentifiers>
+              <version>v0.11</version>
+              <rightsList>
+                <rights rightsURI="https://creativecommons.org/licenses/by/4.0/legalcode">Creative Commons Attribution 4.0 International</rights>
+                <rights rightsURI="info:eu-repo/semantics/openAccess">Open Access</rights>
+              </rightsList>
+              <descriptions>
+                <description descriptionType="Abstract">&lt;p&gt;TuLeD: Tup&amp;iacute;an lexical database&lt;/p&gt;</description>
+              </descriptions>
+            </resource>
+          </payload>
+        </oai_datacite>
+      </metadata>
+    </record>
+    <record>
+      <header>
+        <identifier>oai:zenodo.org:4161623</identifier>
+        <datestamp>2021-03-23T12:02:41Z</datestamp>
+        <setSpec>openaire_data</setSpec>
+        <setSpec>user-lexibank</setSpec>
+        <setSpec>user-tular</setSpec>
+      </header>
+      <metadata>
+        <oai_datacite xmlns="http://schema.datacite.org/oai/oai-1.0/" xsi:schemaLocation="http://schema.datacite.org/oai/oai-1.0/ oai_datacite.xsd">
+          <isReferenceQuality>true</isReferenceQuality>
+          <schemaVersion>3.1</schemaVersion>
+          <datacentreSymbol>CERN.ZENODO</datacentreSymbol>
+          <payload>
+            <resource xmlns="http://datacite.org/schema/kernel-3" xsi:schemaLocation="http://datacite.org/schema/kernel-3 http://schema.datacite.org/meta/kernel-3/metadata.xsd">
+              <identifier identifierType="DOI">10.5281/zenodo.4161623</identifier>
+              <creators>
+                <creator>
+                  <creatorName>Fabrício Ferraz Gerardi</creatorName>
+                  <nameIdentifier nameIdentifierScheme="ORCID" schemeURI="http://orcid.org/">0000-0002-1438-7336</nameIdentifier>
+                  <affiliation>Universität Tübingen</affiliation>
+                </creator>
+                <creator>
+                  <creatorName>Stanislav Reichert</creatorName>
+                  <nameIdentifier nameIdentifierScheme="ORCID" schemeURI="http://orcid.org/">0000-0002-8330-1954</nameIdentifier>
+                  <affiliation>Universität Tübingen</affiliation>
+                </creator>
+                <creator>
+                  <creatorName>Carolina Aragon</creatorName>
+                  <nameIdentifier nameIdentifierScheme="ORCID" schemeURI="http://orcid.org/">0000-0001-9459-9939</nameIdentifier>
+                  <affiliation>Universidade Federal da Paraíba</affiliation>
+                </creator>
+                <creator>
+                  <creatorName>Johann-Mattis List</creatorName>
+                </creator>
+                <creator>
+                  <creatorName>Tim Wientzek</creatorName>
+                  <nameIdentifier nameIdentifierScheme="ORCID" schemeURI="http://orcid.org/">0000-0001-9375-6381</nameIdentifier>
+                  <affiliation>Universität Tübingen</affiliation>
+                </creator>
+              </creators>
+              <titles>
+                <title>CLDF dataset derived from Gerardi and Reichert's "TuLeD: Tupían lexical database" from 2020</title>
+              </titles>
+              <publisher>Zenodo</publisher>
+              <publicationYear>2020</publicationYear>
+              <subjects>
+                <subject>cldf:Wordlist</subject>
+                <subject>linguistics</subject>
+              </subjects>
+              <contributors>
+                <contributor contributorType="Other">
+                  <contributorName>Johann-Mattis List</contributorName>
+                </contributor>
+                <contributor contributorType="Other">
+                  <contributorName>Tiago Tresoldi</contributorName>
+                </contributor>
+                <contributor contributorType="Other">
+                  <contributorName>Robert Forkel</contributorName>
+                </contributor>
+              </contributors>
+              <dates>
+                <date dateType="Issued">2020-10-30</date>
+              </dates>
+              <resourceType resourceTypeGeneral="Dataset"/>
+              <relatedIdentifiers>
+                <relatedIdentifier relatedIdentifierType="URL" relationType="IsSupplementTo">https://github.com/LanguageStructure/tuled/tree/v0.10</relatedIdentifier>
+                <relatedIdentifier relatedIdentifierType="DOI" relationType="IsPartOf">10.5281/zenodo.4161622</relatedIdentifier>
+                <relatedIdentifier relatedIdentifierType="URL" relationType="IsPartOf">https://zenodo.org/communities/lexibank</relatedIdentifier>
+                <relatedIdentifier relatedIdentifierType="URL" relationType="IsPartOf">https://zenodo.org/communities/tular</relatedIdentifier>
+              </relatedIdentifiers>
+              <version>v0.10</version>
+              <rightsList>
+                <rights rightsURI="https://creativecommons.org/licenses/by/4.0/legalcode">Creative Commons Attribution 4.0 International</rights>
+                <rights rightsURI="info:eu-repo/semantics/openAccess">Open Access</rights>
+              </rightsList>
+              <descriptions>
+                <description descriptionType="Abstract">&lt;p&gt;Cite the source of the dataset as:&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Ferraz Gerardi, Fabr&amp;iacute;cio and Reichert, Stanislav (2020) TuLeD: Tup&amp;iacute;an lexical database. Version 0.8. T&amp;uuml;bingen: Eberhard-Karls University&lt;/p&gt;
+&lt;/blockquote&gt;</description>
+              </descriptions>
+            </resource>
+          </payload>
+        </oai_datacite>
+      </metadata>
+    </record>
+  </ListRecords>
+</OAI-PMH>
