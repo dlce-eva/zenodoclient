@@ -2,6 +2,7 @@
 Read metadata from Zenodo via a community's OAI-PMH feed.
 """
 import re
+import html
 import functools
 import collections
 import packaging.version
@@ -77,7 +78,7 @@ class Record:
             if 'vm.citationResult' in line:
                 line = line.split("'", maxsplit=1)[1]
                 assert line.endswith("'\"")
-                return line[:-2]
+                return html.unescape(line[:-2])
 
     @property
     def id(self):

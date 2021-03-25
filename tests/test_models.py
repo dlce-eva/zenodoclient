@@ -1,6 +1,5 @@
-import attr
 import pytest
-from datetime import datetime
+from datetime import datetime, date
 from unittest.mock import Mock
 
 from zenodoclient.models import (
@@ -89,18 +88,18 @@ def test_RecordFile():
     assert rf.url == 'x'
 
 
-def test_entity():
+def test_entity(TestEntity):
     e = Entity()
-
-    @attr.s
-    class TestEntity(Entity):
-        test = attr.ib({'test': None})
-
-    te = TestEntity(test='')
+    te = TestEntity(test='', )
     te.from_dict({'test': True})
 
     with pytest.raises(AttributeError):
         e.__str__()
+
+    te = TestEntity(
+        test='x', l=[1, 2], d={'a': 3}, dt=date(2020, 2, 20), nested=TestEntity(test=''))
+    res = te.to_dict()
+    assert res['dt'] == '2020-02-20'
 
 
 def test_deposition():

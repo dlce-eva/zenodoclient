@@ -12,7 +12,7 @@ def test_Records(mocker):
   <div id='invenio-csl'>
     
     <invenio-csl
-        ng-init="vm.citationResult = 'the citation'"
+        ng-init="vm.citationResult = 'the &amp; citation'"
     >
                 """
             else:
@@ -24,6 +24,6 @@ def test_Records(mocker):
     assert len(recs) == 2
     recs = sorted(recs, key=lambda r: (r.repos.repos, r.version))
     assert recs[-1].tag == 'v0.11'
-    assert recs[0].citation == 'the citation'
+    assert recs[0].citation == 'the & citation'
     assert recs[0].doi
     assert 'cldf:Wordlist' in recs[-1].keywords

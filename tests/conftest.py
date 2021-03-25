@@ -1,4 +1,20 @@
+import attr
 import pytest
+
+from zenodoclient.models import Entity
+
+
+@pytest.fixture
+def TestEntity():
+    @attr.s
+    class TestEntity(Entity):
+        test = attr.ib({'test': None})
+        id = attr.ib(default='x')
+        l = attr.ib(default=None)
+        d = attr.ib(default=None)
+        dt = attr.ib(default=None)
+        nested = attr.ib(default=None)
+    return TestEntity
 
 
 @pytest.fixture
