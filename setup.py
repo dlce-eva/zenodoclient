@@ -3,10 +3,10 @@ from setuptools import setup, find_packages
 
 setup(
     name='zenodoclient',
-    version='0.4.1',
+    version='0.4.2.dev0',
     author='Robert Forkel',
     author_email='forkel@shh.mpg.de',
-    description='programmatic access to ZENODO',
+    description='programmatic access to Zenodo',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
     keywords='',
