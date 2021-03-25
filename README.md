@@ -3,19 +3,19 @@
 [![Build Status](https://github.com/shh-dlce/zenodoclient/workflows/tests/badge.svg)](https://github.com/shh-dlce/zenodoclient/actions?query=workflow%3Atests)
 [![PyPI](https://img.shields.io/pypi/v/zenodoclient.svg)](https://pypi.org/project/zenodoclient)
 
+Python package to access the Zenodo API ([REST](http://developers.zenodo.org/) and
+[OAI-PMH](http://developers.zenodo.org/#oai-pmh)) programmatically and from the command line.
 
 
 # Install
 
-To install from pypi, run
+To install from pypi
 ```shell
 pip install zenodoclient
 ```
-To install from source, clone this repository and run
-```shell
-cd zenodoclient
-pip install -e .
-```
+
+Instructions for a development installation can be found in 
+[`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 
 # Curating deposits
