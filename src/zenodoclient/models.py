@@ -1,7 +1,7 @@
 import re
-from functools import partial
-from datetime import date
+import functools
 import collections
+from datetime import date
 
 import attr
 
@@ -162,7 +162,7 @@ class Metadata(Serializable):
         validator=attr.validators.in_(UPLOAD_TYPES))
     publication_date = attr.ib(
         default=attr.Factory(lambda: date.today().isoformat()),
-        validator=partial(check_regex, r'\d{4}-\d{2}-\d{2}'))
+        validator=functools.partial(check_regex, r'\d{4}-\d{2}-\d{2}'))
     title = attr.ib(default='')
     creators = attr.ib(
         default=attr.Factory(list),
@@ -174,14 +174,14 @@ class Metadata(Serializable):
     access_right_category = attr.ib(default=None)
     publication_type = attr.ib(
         default=None,
-        validator=partial(
+        validator=functools.partial(
             check_controlled_vocabulary,
             PUBLICATION_TYPES,
             lambda i: i.upload_type == 'publication'),
     )
     image_type = attr.ib(
         default=None,
-        validator=partial(
+        validator=functools.partial(
             check_controlled_vocabulary,
             IMAGE_TYPES,
             lambda i: i.upload_type == 'image'),
@@ -190,12 +190,12 @@ class Metadata(Serializable):
     embargo_date = attr.ib(
         default=attr.Factory(date.today),
         validator=[
-            partial(check_access_right, 'embargoed'),
+            functools.partial(check_access_right, 'embargoed'),
             attr.validators.optional(attr.validators.instance_of(date))
         ]
     )
     access_conditions = attr.ib(
-        default=None, validator=partial(check_access_right, 'restricted'),
+        default=None, validator=functools.partial(check_access_right, 'restricted'),
     )
     doi = attr.ib(default='')
     prereserve_doi = attr.ib(default=None)
@@ -203,23 +203,23 @@ class Metadata(Serializable):
     notes = attr.ib(default='')
     related_identifiers = attr.ib(
         default=attr.Factory(list),
-        validator=partial(
+        validator=functools.partial(
             check_list_of_objects,
             dict(scheme=True, identifier=True, relation=RELATION_TYPES, resource_type=False))
     )
     contributors = attr.ib(
         default=attr.Factory(list),
-        validator=partial(check_persons, with_type=CONTRIBUTOR_TYPES))
+        validator=functools.partial(check_persons, with_type=CONTRIBUTOR_TYPES))
     references = attr.ib(default=attr.Factory(list))
     communities = attr.ib(
         default=attr.Factory(list),
         converter=lambda l: [{'identifier': d.get('id', d.get('identifier'))} for d in l],
-        validator=partial(check_list_of_objects, dict(identifier=True))
+        validator=functools.partial(check_list_of_objects, dict(identifier=True))
     )
     grants = attr.ib(
         default=attr.Factory(list),
         converter=lambda l: [convert_grant(d) for d in l],
-        validator=partial(
+        validator=functools.partial(
             check_list_of_objects,
             dict(
                 id=True,
@@ -250,7 +250,7 @@ class Metadata(Serializable):
     thesis_university = attr.ib(default='')
     subjects = attr.ib(
         default=attr.Factory(list),
-        validator=partial(
+        validator=functools.partial(
             check_list_of_objects, dict(term=True, identifier=True, scheme=True))
     )
     version = attr.ib(default='')

@@ -1,6 +1,6 @@
 # zenodoclient
 
-[![Build Status](https://github.com/shh-dlce/zenodoclient/workflows/tests/badge.svg)](https://github.com/shh-dlce/zenodoclient/actions?query=workflow%3Atests)
+[![Build Status](https://github.com/dlce-eva/zenodoclient/workflows/tests/badge.svg)](https://github.com/dlce-eva/zenodoclient/actions?query=workflow%3Atests)
 [![PyPI](https://img.shields.io/pypi/v/zenodoclient.svg)](https://pypi.org/project/zenodoclient)
 
 Python package to access the Zenodo API ([REST](http://developers.zenodo.org/) and

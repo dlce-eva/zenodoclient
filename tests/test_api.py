@@ -3,7 +3,6 @@ import zipfile
 
 from zenodoclient import Zenodo
 from zenodoclient.api import ApiError
-from zenodoclient.models import Record, RecordFile
 
 
 def test_ApiError():

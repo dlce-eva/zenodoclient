@@ -15,10 +15,10 @@ import urllib.request
 
 from urllib3.exceptions import InsecurePlatformWarning, SNIMissingWarning
 from bs4 import BeautifulSoup as bs
+from clldutils.path import md5
 
 from zenodoclient.models import Deposition, DepositionFile, PUBLISHED, \
     UNSUBMITTED, Record
-from zenodoclient.util import md5
 from zenodoclient import oai
 
 warnings.simplefilter('once', SNIMissingWarning)
@@ -106,7 +106,7 @@ class Zenodo(object):
     def record_from_id(self, id_):
         if not id_.startswith('http'):
             id_ = 'https://zenodo.org/record/' + id_
-        soup = bs(requests.get(id_ + '/export/json').text, 'html.parser')
+        soup = bs(requests.get(id_ + '/export/json').text, features='html.parser')
         return Record(**json.loads(soup.find('pre').text))
 
     def record_from_doi(self, doi):
