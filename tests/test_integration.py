@@ -1,12 +1,17 @@
 import os
 import pytest
 import warnings
-from urllib3.exceptions import InsecurePlatformWarning, SNIMissingWarning
+from urllib3.exceptions import InsecurePlatformWarning
+try:
+    from urllib3.exceptions import SNIMissingWarning
+except ImportError:
+    SNIMissingWarning = None
 
 import zenodoclient
 from zenodoclient.api import Zenodo, API_URL_SANDBOX
 
-warnings.simplefilter('ignore', SNIMissingWarning)
+if SNIMissingWarning is not None:
+    warnings.simplefilter('ignore', SNIMissingWarning)
 warnings.simplefilter('ignore', InsecurePlatformWarning)
 
 

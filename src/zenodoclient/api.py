@@ -13,7 +13,11 @@ import warnings
 from http.client import responses as http_status
 import urllib.request
 
-from urllib3.exceptions import InsecurePlatformWarning, SNIMissingWarning
+from urllib3.exceptions import InsecurePlatformWarning
+try:
+    from urllib3.exceptions import SNIMissingWarning
+except ImportError:
+    SNIMissingWarning = None
 from bs4 import BeautifulSoup as bs
 from clldutils.path import md5
 
@@ -21,7 +25,8 @@ from zenodoclient.models import Deposition, DepositionFile, PUBLISHED, \
     UNSUBMITTED, Record
 from zenodoclient import oai
 
-warnings.simplefilter('once', SNIMissingWarning)
+if SNIMissingWarning is not None:
+    warnings.simplefilter('once', SNIMissingWarning)
 warnings.simplefilter('once', InsecurePlatformWarning)
 
 API_URL = 'https://zenodo.org/api/'

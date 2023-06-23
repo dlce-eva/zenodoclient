@@ -213,12 +213,12 @@ class Metadata(Serializable):
     references = attr.ib(default=attr.Factory(list))
     communities = attr.ib(
         default=attr.Factory(list),
-        converter=lambda l: [{'identifier': d.get('id', d.get('identifier'))} for d in l],
+        converter=lambda ll: [{'identifier': d.get('id', d.get('identifier'))} for d in ll],
         validator=functools.partial(check_list_of_objects, dict(identifier=True))
     )
     grants = attr.ib(
         default=attr.Factory(list),
-        converter=lambda l: [convert_grant(d) for d in l],
+        converter=lambda ll: [convert_grant(d) for d in ll],
         validator=functools.partial(
             check_list_of_objects,
             dict(
@@ -298,7 +298,7 @@ class RecordFile(Serializable):
 
 @attr.s
 class Record(Serializable):
-    files = attr.ib(converter=lambda l: [RecordFile(**f) for f in l])
+    files = attr.ib(converter=lambda ll: [RecordFile(**f) for f in ll])
     owners = attr.ib()
     doi = attr.ib()
     stats = attr.ib()
