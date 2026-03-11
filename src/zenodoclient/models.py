@@ -2,8 +2,8 @@ import re
 import functools
 import collections
 from datetime import date
-
-import attr
+import dataclasses
+from typing import Optional, Any
 
 __all__ = ['Record', 'Deposition', 'DepositionFile']
 
@@ -105,7 +105,7 @@ def _to_val(v):
 class Serializable:
     def to_dict(self):
         return collections.OrderedDict(
-            [(f.name, _to_val(getattr(self, f.name))) for f in attr.fields(self.__class__)])
+            [(f.name, _to_val(getattr(self, f.name))) for f in dataclasses.fields(self.__class__)])
 
 
 def check_controlled_vocabulary(vocab, condition, instance, attribute, value):
@@ -155,58 +155,25 @@ def convert_grant(d):
     return d
 
 
-@attr.s
+@dataclasses.dataclass
 class Metadata(Serializable):
-    upload_type = attr.ib(
-        default='dataset',
-        validator=attr.validators.in_(UPLOAD_TYPES))
-    publication_date = attr.ib(
-        default=attr.Factory(lambda: date.today().isoformat()),
-        validator=functools.partial(check_regex, r'\d{4}-\d{2}-\d{2}'))
-    title = attr.ib(default='')
-    creators = attr.ib(
-        default=attr.Factory(list),
-        validator=attr.validators.optional(check_persons))
-    description = attr.ib(default='')
-    access_right = attr.ib(
-        default='open',
-        validator=attr.validators.in_(ACCESS_RIGHTS))
-    access_right_category = attr.ib(default=None)
-    publication_type = attr.ib(
-        default=None,
-        validator=functools.partial(
-            check_controlled_vocabulary,
-            PUBLICATION_TYPES,
-            lambda i: i.upload_type == 'publication'),
-    )
-    image_type = attr.ib(
-        default=None,
-        validator=functools.partial(
-            check_controlled_vocabulary,
-            IMAGE_TYPES,
-            lambda i: i.upload_type == 'image'),
-    )
-    license = attr.ib(default='cc-by')
-    embargo_date = attr.ib(
-        default=attr.Factory(date.today),
-        validator=[
-            functools.partial(check_access_right, 'embargoed'),
-            attr.validators.optional(attr.validators.instance_of(date))
-        ]
-    )
-    access_conditions = attr.ib(
-        default=None, validator=functools.partial(check_access_right, 'restricted'),
-    )
-    doi = attr.ib(default='')
-    prereserve_doi = attr.ib(default=None)
-    keywords = attr.ib(default=attr.Factory(list))
-    notes = attr.ib(default='')
-    related_identifiers = attr.ib(
-        default=attr.Factory(list),
-        validator=functools.partial(
-            check_list_of_objects,
-            dict(scheme=True, identifier=True, relation=RELATION_TYPES, resource_type=False))
-    )
+    upload_type: str = 'dataset'
+    publication_date: date = dataclasses.field(default_factory=lambda: date.today().isoformat())
+    title: str = ''
+    creators: list[dict[str, str]] = dataclasses.field(default_factory=list)
+    description: str = ''
+    access_right: str = 'open'
+    access_right_category: Optional[str] = None
+    publication_type: Optional[str] = None
+    image_type: Optional[str] = None
+    license: str = 'cc-by'
+    embargo_date: date = dataclasses.field(default_factory=date.today)
+    access_conditions: Optional[str] = None
+    doi: str = ''
+    prereserve_doi: Optional[str] = None
+    keywords: list[str] = dataclasses.field(default=list)
+    notes: str = ''
+    related_identifiers: list[str] = dataclasses.field(default=list)
     contributors = attr.ib(
         default=attr.Factory(list),
         validator=functools.partial(check_persons, with_type=CONTRIBUTOR_TYPES))
@@ -261,9 +228,114 @@ class Metadata(Serializable):
     resource_type = attr.ib(default=None)
     alternate_identifiers = attr.ib(default=None)
 
+    def __post_init__(self):
+        upload_type = attr.ib(
+            default='dataset',
+            validator=attr.validators.in_(UPLOAD_TYPES))
+        publication_date = attr.ib(
+            default=attr.Factory(lambda: date.today().isoformat()),
+            validator=functools.partial(check_regex, r'\d{4}-\d{2}-\d{2}'))
+        title = attr.ib(default='')
+        creators = attr.ib(
+            default=attr.Factory(list),
+            validator=attr.validators.optional(check_persons))
+        description = attr.ib(default='')
+        access_right = attr.ib(
+            default='open',
+            validator=attr.validators.in_(ACCESS_RIGHTS))
+        access_right_category = attr.ib(default=None)
+        publication_type = attr.ib(
+            default=None,
+            validator=functools.partial(
+                check_controlled_vocabulary,
+                PUBLICATION_TYPES,
+                lambda i: i.upload_type == 'publication'),
+        )
+        image_type = attr.ib(
+            default=None,
+            validator=functools.partial(
+                check_controlled_vocabulary,
+                IMAGE_TYPES,
+                lambda i: i.upload_type == 'image'),
+        )
+        license = attr.ib(default='cc-by')
+        embargo_date = attr.ib(
+            default=attr.Factory(date.today),
+            validator=[
+                functools.partial(check_access_right, 'embargoed'),
+                attr.validators.optional(attr.validators.instance_of(date))
+            ]
+        )
+        access_conditions = attr.ib(
+            default=None, validator=functools.partial(check_access_right, 'restricted'),
+        )
+        doi = attr.ib(default='')
+        prereserve_doi = attr.ib(default=None)
+        keywords = attr.ib(default=attr.Factory(list))
+        notes = attr.ib(default='')
+        related_identifiers = attr.ib(
+            default=attr.Factory(list),
+            validator=functools.partial(
+                check_list_of_objects,
+                dict(scheme=True, identifier=True, relation=RELATION_TYPES, resource_type=False))
+        )
+        contributors = attr.ib(
+            default=attr.Factory(list),
+            validator=functools.partial(check_persons, with_type=CONTRIBUTOR_TYPES))
+        references = attr.ib(default=attr.Factory(list))
+        communities = attr.ib(
+            default=attr.Factory(list),
+            converter=lambda ll: [{'identifier': d.get('id', d.get('identifier'))} for d in ll],
+            validator=functools.partial(check_list_of_objects, dict(identifier=True))
+        )
+        grants = attr.ib(
+            default=attr.Factory(list),
+            converter=lambda ll: [convert_grant(d) for d in ll],
+            validator=functools.partial(
+                check_list_of_objects,
+                dict(
+                    id=True,
+                    code=False,
+                    program=False,
+                    acronym=False,
+                    funder=False,
+                    links=False,
+                    title=False))
+        )
+        journal_title = attr.ib(default='')
+        journal_volume = attr.ib(default='')
+        journal_issue = attr.ib(default='')
+        journal_pages = attr.ib(default='')
+        conference_title = attr.ib(default='')
+        conference_acronym = attr.ib(default='')
+        conference_dates = attr.ib(default='')
+        conference_place = attr.ib(default='')
+        conference_url = attr.ib(default=None)
+        conference_session = attr.ib(default='')
+        conference_session_part = attr.ib(default='')
+        imprint_publisher = attr.ib(default='')
+        imprint_isbn = attr.ib(default='')
+        imprint_place = attr.ib(default='')
+        partof_title = attr.ib(default='')
+        partof_pages = attr.ib(default='')
+        thesis_supervisors = attr.ib(default=attr.Factory(list))
+        thesis_university = attr.ib(default='')
+        subjects = attr.ib(
+            default=attr.Factory(list),
+            validator=functools.partial(
+                check_list_of_objects, dict(term=True, identifier=True, scheme=True))
+        )
+        version = attr.ib(default='')
+        language = attr.ib(
+            default=None,
+            validator=attr.validators.optional(check_iso639_3))
+        relations = attr.ib(default=None)
+        resource_type = attr.ib(default=None)
+        alternate_identifiers = attr.ib(default=None)
+
     def asdict(self):
         res = {}
-        for f in attr.fields(self.__class__):
+        for f in dataclasses.fields(self.__class__):
             v = getattr(self, f.name)
             if v or isinstance(v, bool):
                 if isinstance(v, date):
@@ -296,11 +368,11 @@ class RecordFile(Serializable):
         return self.links['self']
 
 
-@attr.s
+@dataclasses.dataclass
 class Record(Serializable):
-    files = attr.ib(converter=lambda ll: [RecordFile(**f) for f in ll])
-    owners = attr.ib()
-    doi = attr.ib()
+    files: list[RecordFile]
+    owners: list
+    doi: str
     stats = attr.ib()
     links = attr.ib()
     conceptdoi = attr.ib()
@@ -311,46 +383,53 @@ class Record(Serializable):
     id = attr.ib()
     metadata = attr.ib(converter=lambda d: Metadata(**d))
 
+    def __post_init__(self):
+        files = attr.ib(converter=lambda ll: [RecordFile(**f) for f in ll])
+        metadata = attr.ib(converter=lambda d: Metadata(**d))
 
-@attr.s
+
+@dataclasses.dataclass
 class Entity(Serializable):
     def __str__(self):
         """
         To simplify formatting of API URLs, the string representation of entities is their
         id.
         """
-        return '{0}'.format(getattr(self, 'id'))
+        return f"{getattr(self, 'id')}"
 
     @classmethod
     def from_dict(cls, d):
-        fields = [f.name for f in attr.fields(cls)]
+        fields = [f.name for f in dataclasses.fields(cls)]
         return cls(**{k: v for k, v in d.items() if k in fields})
 
 
-@attr.s
+@dataclasses.dataclass
 class Deposition(Entity):
     """
     http://developers.zenodo.org/#representation
     """
-    metadata = attr.ib(
-        converter=lambda v: v if isinstance(v, Metadata) else Metadata(**v),
-    )
-    created = attr.ib()
-    id = attr.ib(validator=attr.validators.instance_of(int))
-    modified = attr.ib()
-    owner = attr.ib()
-    state = attr.ib(validator=attr.validators.in_(STATES))
-    submitted = attr.ib(validator=attr.validators.instance_of(bool))
-    title = attr.ib(default='')
-    files = attr.ib(
-        default=attr.Factory(list),
-        converter=lambda v: [
-            vv if isinstance(vv, DepositionFile) else DepositionFile.from_dict(vv) for vv in v],
-    )
-    doi = attr.ib(default=None)
-    doi_url = attr.ib(default=None)
-    record_id = attr.ib(default=None)
-    record_url = attr.ib(default=None)
+    metadata: Metadata
+    created: date
+    id: int
+    modified: date
+    owner: str
+    state: str
+    submitted: bool
+    title: str = ''
+    files: list['DepositionFile'] = dataclasses.field(default_factory=list)
+    doi: Optional[str] = None
+    doi_url: Optional[str] = None
+    record_id: Optional[str] = None
+    record_url: Optional[str] = None
+
+    def __post_init__(self):
+        if not isinstance(self.metadata, Metadata):
+            self.metadata = Metadata(**self.metadata)
+        assert isinstance(self.id, int)
+        assert self.state in STATES
+        assert isinstance(self.submitted, bool)
+        self.files = [
+            v if isinstance(v, DepositionFile) else DepositionFile.from_dict(v) for v in self.files]
 
     def validate_update(self):
         if not self.metadata.creators:
@@ -365,12 +444,15 @@ class Deposition(Entity):
             raise ValueError('at least one file must be uploaded')
 
 
-@attr.s
+@dataclasses.dataclass
 class DepositionFile(Entity):
-    links = attr.ib()
-    filename = attr.ib()
-    filesize = attr.ib()
-    checksum = attr.ib()
+    """
+
+    """
+    links: dict[str, Any]
+    filename: str
+    filesize: int
+    checksum: str
 
     def __str__(self):  # pragma: no cover
         return self.links['self']

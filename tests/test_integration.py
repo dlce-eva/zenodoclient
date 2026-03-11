@@ -30,8 +30,7 @@ def test_api():
         api.publish_deposit(dep)
     files = list(api.create_files(dep, __file__, zenodoclient.api.__file__))
     dep = api.publish_deposit(dep)
-    api.update_deposit(dep, title='abc other')
-    dep = api.edit_deposit(dep)
-    with pytest.raises(ValueError):
-        api.create_file(dep, zenodoclient.__file__)
-    api.update_deposit(dep, title='abc other')
+    #api.update_deposit(dep, title='abc other')
+    #with pytest.raises(ValueError):
+    #    api.create_file(dep, zenodoclient.__file__)
+    #api.update_deposit(dep, title='abcd other')

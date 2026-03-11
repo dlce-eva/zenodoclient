@@ -12,6 +12,7 @@ import tempfile
 import warnings
 from http.client import responses as http_status
 import urllib.request
+from typing import Union
 
 from urllib3.exceptions import InsecurePlatformWarning
 try:
@@ -35,15 +36,20 @@ ACCESS_TOKEN = os.environ.get('ZENODO_ACCESS_TOKEN')
 
 
 class ApiError(Exception):
-    def __init__(self, status, details=None):
+    def __init__(self, status, details=None, req=None):
         msg = '{0} {1}'.format(status, http_status[status])
-        if details and 'message' in details:
-            msg += ': {0}'.format(details['message'])
+        if details:
+            if 'message' in details:
+                msg += ': {0}'.format(details['message'])
+            else:
+                msg += str(details)
         self.errors = details.get('errors') if details else None
+        if req:
+            msg += '\n---\n{}'.format(req)
         Exception.__init__(self, msg)
 
 
-class Zenodo(object):
+class Zenodo:
 
     DOI_PATTERN = re.compile(r'10\.5281/zenodo\.(?P<id>[0-9]+)$')
 
@@ -71,8 +77,7 @@ class Zenodo(object):
             kw['headers'] = {"Content-Type": "application/json"}
             kw['data'] = json.dumps(kw['data'])
 
-        response = getattr(requests, method)(
-            '{0}{1}{2}'.format(self._api_url, prefix, path), params=params, **kw)
+        response = getattr(requests, method)(f'{self._api_url}{prefix}{path}', params=params, **kw)
         if response.status_code == expected:
             if expected != 204:
                 return response.json()
@@ -80,7 +85,8 @@ class Zenodo(object):
         # See http://developers.zenodo.org/#errors
         raise ApiError(
             response.status_code,
-            response.json() if 400 <= response.status_code < 500 else None)
+            response.json() if 400 <= response.status_code < 500 else None,
+            req=f"{self._api_url}{prefix}{path}\n{params}\n{kw}")
 
     #
     # Records API
@@ -204,7 +210,7 @@ class Zenodo(object):
         # We automatically unlock published Depositions for editing:
         published = dep.state == PUBLISHED
         if published:
-            print('unlock for editing')
+            print(f'unlock for editing: {kw}')
             dep = self.edit_deposit(dep)
 
         for k, v in kw.items():
